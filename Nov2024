@@ -514,3 +514,30 @@ public long maximumBeauty(int[] flowers, long newFlowers, int _target, int _full
 
 }
 -----
+destroy sequential targets - 
+https://leetcode.com/problems/destroy-sequential-targets/description/?envType=company&envId=intuit&favoriteSlug=intuit-six-months
+
+answer - 
+find maxfreq f modulus opeation
+and once found, find which min number can get that maxfreq.
+class Solution {
+    public int destroyTargets(int[] nums, int space) {
+        HashMap<Integer, Integer> freq = new HashMap<>();
+
+        int maxfreq = 0;
+        for(int num: nums) {
+            int modulus = num%space;
+            freq.put(modulus, freq.getOrDefault(modulus, 0)+1);
+            maxfreq = Math.max(maxfreq, freq.get(modulus));
+        }
+
+        int minNum = Integer.MAX_VALUE;
+        for(int num: nums) {
+            if(freq.get(num%space) == maxfreq && minNum > num) {
+                minNum = num;
+            }
+        }
+
+        return minNum;
+    }
+}
