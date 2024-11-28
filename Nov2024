@@ -1,0 +1,292 @@
+1. longest valid parentehesis - 
+https://leetcode.com/problems/longest-valid-parentheses/?envType=company&envId=intuit&favoriteSlug=intuit-six-months
+class Solution {
+    public int longestValidParentheses(String str) {
+        int max = 0;
+        Stack<Integer> s = new Stack<>();
+        s.push(-1);
+        int n = str.length();
+
+        //this is o(1) spae solution
+        int left = 0; int right = 0;
+        for(int i=0;i<n; i++) {
+            char c = str.charAt(i);
+            if(c == '(') {
+                left++;
+            }else if (c==')') {
+                right++;
+            }
+            if(left == right) {
+                max = Math.max(max, 2*right);
+            }else if(right > left) {
+                left = 0; right = 0;
+            }
+        }
+
+        left = 0; right = 0;
+        for(int i=n-1;i>=0; i--) {
+            char c = str.charAt(i);
+            if(c == '(') {
+                left++;
+            }else if (c==')') {
+                right++;
+            }
+            if(left == right) {
+                max = Math.max(max, 2*left);
+            }else if(left > right) {
+                left = 0; right = 0;
+            }
+        }
+        return max;
+    }
+
+        //this is space o(n) solution , we have a better o(1) solution as well
+    /*    for(int i=0; i<str.length(); i++) {
+            char c = str.charAt(i);
+            if(c== '(' ){
+                s.push(i);
+            }else {
+                s.pop();
+                if(s.isEmpty()) {
+                    s.push(i);
+                }else {
+                    max = Math.max(max, (i-s.peek()));
+                }
+            }
+        }
+        return max;
+            
+    } */
+}
+
+--
+
+sudoko solver - 
+https://leetcode.com/problems/sudoku-solver/description/?envType=company&envId=intuit&favoriteSlug=intuit-six-months
+class Solution {
+    public void solveSudoku(char[][] board) {
+        
+        int m = board.length;
+        int n  = board[0].length;
+        int[][] v = new int[m][n];
+        for(int i=0; i<m ; i++) {
+            for(int j=0; j<n; j++) {
+                if(board[i][j] == '.') {
+                    v[i][j] = 0;
+                }else {
+                    v[i][j] = Character.getNumericValue(board[i][j]);
+                }
+            }
+        }
+        solve(v, 0, 0);
+      //  for(int i=0; i<m; i++) {
+      //              for(int j=0; j<n; j++) {
+      //                  System.out.println(" v = "+v[i][j]);
+      //              }
+      //          }
+        
+        
+        for(int i=0; i<m; i++) {
+            for(int j=0; j<n; j++) {
+                board[i][j] = (char)(v[i][j]+'0');
+            }
+        }
+    }
+    
+    public boolean solve(int[][] v, int row, int col) {
+        if(row >= v.length) return true;
+        if(col >= v[0].length) return solve(v, row+1, 0);
+        if(v[row][col] != 0) return solve(v, row, col+1);
+        
+        for(int i=1; i<=9; i++) {
+            if(v[row][col] == 0 && isValid(v, row, col, i)) {
+                v[row][col] = i;
+               
+                if(solve(v, row, col+1)) {
+                    return true;
+                }else {
+                   
+                v[row][col] = 0;
+                }
+            }
+        }
+        return false;
+    }
+    
+    public boolean isValid(int[][]v, int row, int col, int val) {
+        for(int i=0; i<v.length; i++) {
+            if(v[i][col] == val || v[row][i]==val) return false;
+        }
+        
+        int startrow = row  - row%3;
+        int startcol = col - col%3;
+        for(int i=startrow; i<(startrow+3); i++) {
+            for(int j=startcol; j<(startcol+3); j++) {
+                if(v[i][j] ==val) return false;
+            }
+        }
+        return true;
+    }
+}
+--
+3. zigzag conversion
+https://leetcode.com/problems/zigzag-conversion/?envType=company&envId=intuit&favoriteSlug=intuit-six-months
+class Solution {
+    public String convert(String s, int numRows) {
+        if(numRows ==1) return s;
+        int n = s.length();
+        int sections = (int)Math.ceil(n / (2*numRows-2.0));
+        int cols = sections*(numRows-1);
+
+        char[][] matrix = new char[numRows][cols];
+        for(int i=0; i<numRows; i++) {
+            for(int j=0; j<cols; j++) {
+                matrix[i][j] = ' ';
+            }
+        }
+
+        int currentStringIndex = 0;
+        int startrow = 0;  int startcol = 0;
+        while(currentStringIndex<n) {
+            while(startrow< numRows && currentStringIndex<n) {
+            matrix[startrow][startcol] = s.charAt(currentStringIndex);
+            currentStringIndex++;
+            startrow++;
+            }
+
+            startrow = startrow-2;
+            startcol = startcol+1;
+           
+                while(startrow>0 && startcol<cols && currentStringIndex<n) {
+                    matrix[startrow][startcol] = s.charAt(currentStringIndex);
+                    startrow--;
+                    startcol++;
+                    currentStringIndex++;
+                }
+            
+        }
+
+        StringBuffer buf = new StringBuffer();
+        for(int i=0; i<numRows; i++) {
+            for(int j=0; j<cols; j++) {
+                if(matrix[i][j] != ' ')
+                    buf.append(matrix[i][j]);
+            }
+        }
+
+        return buf.toString();
+    }
+}
+---
+word break - 
+https://leetcode.com/problems/word-break/description/?envType=company&envId=intuit&favoriteSlug=intuit-six-months
+ boolean[] dp = new boolean[s.length() +1] ;
+    dp[0] = true;
+
+    for(int i=1; i<=s.length(); i++) {
+        for(int j=0;j<i; j++) {
+            if(dp[j] && dict.contains(s.substring(j,i))) {
+                dp[i] = true;
+                break;
+            }
+        }
+    }
+
+    return dp[s.length()];
+   }
+---
+max product - 
+https://leetcode.com/problems/maximum-product-of-three-numbers/editorial/?envType=company&envId=intuit&favoriteSlug=intuit-six-months
+--
+
+number of longest inc sequence - 
+https://leetcode.com/problems/number-of-longest-increasing-subsequence/description/?envType=company&envId=intuit&favoriteSlug=intuit-six-months
+class Solution {
+    public int findNumberOfLIS(int[] nums) {
+        int n = nums.length;
+        int[] len = new int[n];
+        int[] count = new int[n];
+
+        Arrays.fill(len, 1);
+        Arrays.fill(count, 1);
+
+        for(int i=1; i<n; i++) {
+            for(int j=0; j<i; j++) {
+                if(nums[j] < nums[i]) {
+                    if(len[j]+1 > len[i]) {
+                        len[i] = len[j]+1;
+                        count[i] = 0;
+                    }
+                    if(len[i] == len[j]+1) {
+                        count[i] += count[j];
+                    }
+                }
+            }
+        }
+
+        int max = 0;
+        for(int i=0; i<n; i++) {
+            max = Math.max(max, len[i]);
+        }
+
+        int res = 0;
+        for(int i=0; i<n; i++) {
+            if(len[i] == max) {
+                res += count[i];
+            }
+        }
+
+        return res;
+    }
+}
+---
+circular queue - 
+https://leetcode.com/problems/design-circular-queue/?envType=company&envId=intuit&favoriteSlug=intuit-six-months
+----
+number of operations to make network connected
+https://leetcode.com/problems/number-of-operations-to-make-network-connected/description/?envType=company&envId=intuit&favoriteSlug=intuit-six-months
+---
+get max score - 
+https://leetcode.com/problems/get-the-maximum-score/description/?envType=company&envId=intuit&favoriteSlug=intuit-six-months
+public int maxSum(int[] nums1, int[] nums2) {
+        //int mod = (int)1e9+7;
+        int m = nums1.length;
+        int n = nums2.length;
+        int i=0;
+        int j=0;
+
+        int sum1 = 0; int sum2 = 0;
+        while(i<m && j<n) {
+            if(nums1[i] < nums2[j]) {
+                sum1 = sum1 + nums1[i];
+                i++;
+            } else if(nums1[i] > nums2[j]) {
+                sum2 = sum2 + nums2[j];
+                j++;
+            }else {
+                sum1 = sum2 = Math.max(sum1, sum2) + nums1[i];
+                i++;
+                j++;
+            }
+        }
+
+        while(i<m) {
+            sum1 = sum1 + nums1[i];
+            i++;
+        }
+
+        while(j<n) {
+            sum2 = sum2 + nums2[j];
+            j++;
+        }
+
+        long mod  = (long)Math.pow(10,9)+7;
+        return (int)(Math.max(sum1, sum2)%mod);
+
+    }
+
+--
+number of distinct substrings ain a string
+https://leetcode.com/problems/number-of-distinct-substrings-in-a-string/?envType=company&envId=intuit&favoriteSlug=intuit-six-months
+
+
