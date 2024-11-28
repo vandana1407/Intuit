@@ -397,3 +397,120 @@ class Solution {
 }
 
 ---
+max beauty of garden - 
+https://leetcode.com/problems/maximum-total-beauty-of-the-gardens/description/?envType=company&envId=intuit&favoriteSlug=intuit-six-months
+
+
+answer - 
+https://leetcode.com/problems/maximum-total-beauty-of-the-gardens/solutions/1931535/java-binary-search-solution-with-code-comments/?envType=company&envId=intuit&favoriteSlug=intuit-six-months
+package com.practise;
+
+import java.util.Arrays;
+
+public class BeautifulGarden {
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+
+	}
+	
+
+
+// Returns the index of the first Element which is smaller than val.
+///  sIdx <= index <= eIdx 
+
+public int getIndex(int[] arr,int sIdx,int eIdx,long val){
+    int ans = eIdx;
+    while(sIdx <= eIdx){
+        int mid = sIdx + (eIdx - sIdx)/2;
+        if(arr[mid] < val){
+            ans = mid;
+            sIdx = mid + 1;
+        }else{
+            eIdx = mid - 1;
+        }
+    }
+    return ans;
+}
+
+public long maximumBeauty(int[] flowers, long newFlowers, int _target, int _full, int _partial) {
+    long[] cumsum = new long[flowers.length];                   //Store the cummulative sum.
+    Arrays.sort(flowers);
+    cumsum[0] = flowers[0];
+    long complete = 0;
+    long partial_c = 0;
+    long target = (long)_target;
+    long full = (long)_full;
+    long partial = (long)_partial;
+    int index = 0;
+    if(flowers[0] < target) partial_c++;
+    if(flowers[0] >= target)complete++;
+    for(int i = 1;i<flowers.length;i++){
+        cumsum[i] = cumsum[i - 1] + (long)flowers[i];
+        if(flowers[i] >= target){
+            complete++;
+        }
+        else {
+            index = Math.max(i,index);                            //Finding the Maximum index whoose value lies below target.  
+            partial_c++;
+        }
+    
+    }
+    //Intution : 
+    // The overall value depends on 2 things : 
+    // (i) The number of complete gardens : For this, we can increment the counter.
+    // (ii) The minimum flowers present in all of the partial gardens : For this, 
+    //we try to increase the minimum number of flowers present in a partial Garden.
+    //     
+    long ans = full*complete;
+    if(partial_c > 0){                                              // If there is at least one partially filled Garden.
+        long lo = flowers[0];                                       // The least value for the minimum value in a partial Garden.
+        long hi = target - 1;                                       // The maximum possible value of a garden without making it a complete Garden.
+        while(lo <= hi){
+            long mid = lo + (hi - lo)/2;
+            //Calculate the First Flower that is less than mid : 
+            int myIdx = getIndex(flowers,0,index,mid);              //Fetch the index of first garden whoose number of flowers < mid.
+            long t_required = mid*(myIdx + 1) - cumsum[myIdx];      //Calculate the required number of flowers to make the number of flowers in partial garden at least mid.
+            if(t_required <= newFlowers){                           //If there are enough flowers.
+                ans = Math.max(ans, full*complete + mid*partial);   //Store for a probable answer.
+                lo = mid + 1;                                       //Try to increase the minimum value of all partial Gardens that is possible by the Garden.
+            }else{
+                hi = mid - 1;
+            }
+        }
+    }
+    if(index==0)return ans;
+    for(int i = index;i>=0;i--){
+        long calc = 0;
+        long diff = target - flowers[i];                            //Number of flowers required to convert the Garden[i] to complete Garden.
+        if(diff > newFlowers)break;                                 //Not enough flowers. Break
+        newFlowers -= diff;                                         //reduce the number of Flowers Left.
+        complete++;                                                 //Increase the number of complete Gardens.
+        calc += full*complete;
+        if(i==0){
+            ans = Math.max(ans,calc);
+            break;
+        }                                                           // If there is at least one partially filled Garden.
+        long lo = flowers[0];                                       // The least value for the minimum value in a partial Garden.
+        long hi = target - 1;                                       // The maximum possible value of a garden without making it a complete Garden.
+        while(lo <= hi){                                
+            long mid = lo + (hi - lo)/2;
+            //Calculate the First Flower that is less than mid : 
+            int myIdx = getIndex(flowers,0,i - 1,mid);
+            long t_required = mid*(myIdx + 1) - cumsum[myIdx];
+            if(t_required <= newFlowers){
+                ans = Math.max(ans, calc + mid*partial);
+                lo = mid + 1;
+            }else{
+                hi = mid - 1;
+            }
+        }
+    }
+    return ans;
+    
+}
+
+	
+
+}
+-----
