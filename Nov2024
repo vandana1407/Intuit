@@ -288,5 +288,112 @@ public int maxSum(int[] nums1, int[] nums2) {
 --
 number of distinct substrings ain a string
 https://leetcode.com/problems/number-of-distinct-substrings-in-a-string/?envType=company&envId=intuit&favoriteSlug=intuit-six-months
+several o(n2) solutions- 
+class Solution {
+    public int countDistinct(String s) {
+        HashSet<String> set = new HashSet<>();
+
+        for(int i = 0 ; i <= s.length() ; i++){
+            for(int j = i+1 ; j <= s.length() ; j++){
+                
+                set.add(s.substring(i,j));
+            }
+        }
+
+        return set.size();
+    }
+}
+
+trie
+class Solution {
+    class TrieNode{
+        Character ch;
+        HashMap<Character,TrieNode> map;
+
+        TrieNode(Character ch){
+            this.ch = ch;
+            this.map = new HashMap<>();
+        }
+    }
+
+    TrieNode root;
+    public int countDistinct(String s) {
+        root = new TrieNode('*');
+        int count = 0;
+
+        for(int i = 0 ; i < s.length() ; i++){
+            TrieNode cur = root;
+
+            for(int j = i ; j < s.length() ; j++){
+                Character ch = s.charAt(j);
+
+                if(!cur.map.containsKey(ch)){
+                    TrieNode node = new TrieNode(ch);
+                    cur.map.put(ch,node);
+                    count++;
+                }
+
+                cur = cur.map.get(ch);
+            }
+        }
+
+        return count;
+    }
+}
+
+rabin carp - rolling window solution - 
+based of hashcodes.
+see this - 
+https://leetcode.com/problems/number-of-distinct-substrings-in-a-string/?envType=company&envId=intuit&favoriteSlug=intuit-six-months
+class Solution {
+    private static final int PRIME = 101;
+    private static final int MOD = 1_000_000_007;
+    public int countDistinct(String s) {
+        int res = 0; int n = s.length();
+        
+        long[] power = new long[s.length()];
+        power[0] = 1;
+        for(int i=1; i<n; i++) {
+            power[i] = (power[i-1] *PRIME)%MOD;
+        }
+
+        long hash = 0L;
+         
+         //this loop is continously creating string with one char added to end - a, aa, aab, aabb, aabba..etc
+        for(int k=0; k<n; k++) {
+            int c = s.charAt(k);
+
+            HashSet<Integer> set = new HashSet<>();
+            hash = (hash*PRIME + c)%MOD;
+            set.add((int)hash);
+
+            long curr = hash;
+            //this loop is to create strings of varios lengths
+            //so if string of length 1 above (k=0) , then we just keep on moving entire lengthof string to get distinct 1 letter string
+            //with m=0 j=1   = aa  and here we remove m=0 a , and add j=1 a, so single string of length 1  = a
+            //but we move sliding window 1 right
+            //similarly next iteration is m=1 j=2 so we are trying to find has for single letter b
+            //and so on
+            //similarly when we have k=1, we have 2 letter string aa
+            //now we move m and j create unique 2 letter strings in set
+            //and hence creating hashset new inside k - each hashset just acumulates 1 letter  or 2 letter unique strings.
+            for(int m=0, j=k+1; j<s.length(); m++,j++) {
+                int l = s.charAt(m);
+                int r = s.charAt(j);
 
 
+                //here we did power[k] because in 12 1 is the most significant bit and 
+                //hence we have power[1] for 1 in 12.
+                curr = curr - (power[k]*l)%MOD  +MOD;
+                curr = (curr*PRIME+r)%MOD;
+                set.add((int)curr);
+            }
+
+            res = res + set.size();
+        }
+        return res;
+    }
+
+}
+
+---
