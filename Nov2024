@@ -541,3 +541,95 @@ class Solution {
         return minNum;
     }
 }
+
+-- max path value to get
+https://leetcode.com/problems/most-profitable-path-in-a-tree/description/?envType=company&envId=intuit&favoriteSlug=intuit-six-months
+
+solution:
+class Solution {
+    public int mostProfitablePath(int[][] edges, int bob, int[] amount) {
+        int n = amount.length; //number of nodes in graph
+        ArrayList<Integer>[] adjLst = new ArrayList[n];
+        for(int i=0; i<n; i++) {
+            adjLst[i] = new ArrayList<Integer>();
+        }
+
+        for(int[] edge:  edges) {
+            int u = edge[0];
+            int v = edge[1];
+            adjLst[u].add(v);
+            adjLst[v].add(u);
+        }
+
+        Pair[] p = new Pair[n];
+         for(int i=0;i<n;i++){
+            p[i]=new Pair();  //initializing pair array
+        }
+        boolean[] bobvisited = new boolean[n];
+        boolean[] alicevisited = new boolean[n];
+        
+        dfsBob(adjLst, p, 0, bob, bobvisited);
+        return dfsAlice(adjLst, p, 0, 0, alicevisited, amount);
+        
+    }
+
+    public int dfsBob(ArrayList<Integer>[] adjLst, Pair[] vis, int time, int bob, boolean[] visited) {
+        visited[bob] = true;
+        if(bob == 0) return 0;
+        
+
+        for(int v: adjLst[bob]) {
+            if(!visited[v]) {
+                int output = dfsBob(adjLst, vis, time+1,v, visited);
+                if(output==0) {
+                    vis[bob] = new Pair(time);
+                    return 0;
+                }
+            }
+        }
+        return -1;
+    }
+
+    public int dfsAlice(ArrayList<Integer>[] adjLst,Pair[] vis, 
+    int time, int alice, boolean[] visited, int[] amount) {
+        visited[alice] = true;
+        int cost = 0;
+        if(vis[alice] != null && vis[alice].val == false) {
+            cost = amount[alice];
+        }else {
+            if(vis[alice].time < time) {
+                cost = 0;
+            } else if (vis[alice].time == time) {
+                cost = amount[alice]/2;
+            }else {
+                cost = amount[alice];
+            }
+        }
+
+        int ans = (int) -1e9;
+        for(int v:adjLst[alice]) {
+            if(!visited[v]) {
+                ans = Math.max(ans, dfsAlice(adjLst, vis, time+1, v, visited, amount));
+            }
+        }
+
+        if(ans == (int)-1e9) return cost;
+        return ans+cost;
+    }
+}
+
+class Pair {
+    boolean val;
+    int time;
+
+    public Pair() {
+        val = false;
+    }
+
+    public Pair (int time) {
+        this.time = time;
+        val =true;
+    }
+
+}
+---
