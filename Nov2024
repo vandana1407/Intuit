@@ -704,3 +704,54 @@ class Solution {
 }
 
 ---
+making string anti pallindrome - 
+https://leetcode.com/problems/make-string-anti-palindrome/submissions/1466324396/?envType=company&envId=intuit&favoriteSlug=intuit-six-months
+
+o(n) solution
+class Solution {
+    public String makeAntiPalindrome(String s) {
+        int[] freq = new int[26];
+
+        for(char c: s.toCharArray()) {
+            freq[c-'a']++;
+        }
+
+        StringBuffer buf = new StringBuffer();
+        int i = 0; int n = s.length();
+        int x = 0;
+        while(i< n/2) {
+            while(freq[x] ==0) {
+                x++;
+            }
+
+            freq[x]--;
+            buf.append((char)(x + 'a'));
+            i++;
+        }
+
+        while(i<n) {
+            int pair = buf.charAt(n-i-1)-'a';
+
+            int j = x;
+            boolean notFound = true;
+            while(j<26) {
+                if(freq[j]>0 && j != pair) {
+                    freq[j]--;
+                    buf.append((char)(j+'a'));
+                    notFound = false;
+                    break;
+                }
+                j++;
+            }
+
+            if(notFound) {
+                return "-1";
+            }
+            i++;
+        }
+
+        return buf.toString();
+        
+    }
+}
+--
